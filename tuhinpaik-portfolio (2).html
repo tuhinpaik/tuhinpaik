@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tuhin Paik ~ Developer Portfolio</title>
+<meta name="description" content="Tuhin Paik — developer, builder, learner. A terminal-styled portfolio built with JavaScript, Python, React & Node.js.">
+<meta name="author" content="Tuhin Paik">
+<meta name="keywords" content="Tuhin Paik, developer portfolio, web developer, JavaScript, Python, React, Node.js, St. Xavier's College">
+<link rel="canonical" href="https://tuhinpaik.in">
+<meta name="theme-color" content="#0a0f0e">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Tuhin Paik ~ Developer Portfolio">
+<meta property="og:description" content="Developer, builder, learner. A terminal-styled portfolio — type 'help' and see what happens.">
+<meta property="og:url" content="https://tuhinpaik.in">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Tuhin Paik ~ Developer Portfolio">
+<meta name="twitter:description" content="Developer, builder, learner. A terminal-styled portfolio — type 'help' and see what happens.">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0f0e'/%3E%3Ctext x='14' y='42' font-family='monospace' font-size='30' fill='%236ee7a8'%3E%3E_%3C/text%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0f0e;
+    --bg-panel: #0d1413;
+    --border: #1c2826;
+    --text-dim: #5c7570;
+    --text-mid: #8fa89f;
+    --text-bright: #e4f2ec;
+    --green: #6ee7a8;
+    --cyan: #7cd4d8;
+    --pink: #f28cc6;
+    --amber: #e8b76a;
+    --scanline: rgba(110,231,168,0.02);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background: var(--bg);
+    color: var(--text-mid);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    line-height: 1.65;
+    min-height:100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px, var(--scanline) 2px, var(--scanline) 4px
+    );
+    pointer-events:none;
+    z-index:50;
+  }
+  ::selection{ background: var(--green); color: #04100b; }
+
+  a{ color: var(--pink); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color .15s ease, opacity .15s ease; }
+  a:hover{ border-bottom-color: var(--pink); }
+
+  .crt-frame{
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 48px 24px 120px;
+    position: relative;
+  }
+
+  .titlebar{
+    display:flex; align-items:center; justify-content:space-between;
+    border:1px solid var(--border);
+    background: var(--bg-panel);
+    padding:10px 16px;
+    border-radius: 6px 6px 0 0;
+    font-size:12px;
+    color: var(--text-dim);
+    cursor: grab;
+    user-select: none;
+  }
+  .titlebar.dragging{ cursor: grabbing; }
+  .dots{ display:flex; gap:7px; }
+  .dot{ width:11px; height:11px; border-radius:50%; background:#28322f; }
+  .titlebar .path{ letter-spacing:0.5px; }
+
+  .window{
+    position: relative;
+    border: 1px solid var(--border);
+    border-top:none;
+    background: var(--bg-panel);
+    padding: 28px clamp(18px, 4vw, 40px) 36px;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 20px 60px -20px rgba(0,0,0,0.6);
+    opacity:0;
+    transform: translateY(14px) scale(.995);
+    animation: windowIn .6s cubic-bezier(.16,1,.3,1) forwards;
+  }
+  @keyframes windowIn{ to{ opacity:1; transform:none; } }
+
+  .resize-handle{
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    width: 16px;
+    height: 16px;
+    cursor: nwse-resize;
+    opacity: 0.35;
+    transition: opacity .2s ease;
+    background:
+      linear-gradient(135deg, transparent 0%, transparent 42%, var(--text-dim) 42%, var(--text-dim) 50%, transparent 50%, transparent 62%, var(--text-dim) 62%, var(--text-dim) 70%, transparent 70%);
+  }
+  .resize-handle:hover{ opacity: 0.85; }
+
+  .window-hint{
+    text-align:center;
+    color: var(--text-dim);
+    font-size: 11px;
+    margin-top: 10px;
+    opacity: 0.7;
+  }
+  @media (max-width: 700px){
+    .window-hint{ display:none; }
+  }
+
+  .line{ white-space:pre-wrap; word-break:break-word; }
+  .prompt-user{ color: var(--green); }
+  .prompt-sep{ color: var(--text-dim); }
+  .prompt-path{ color: var(--cyan); }
+  .prompt-dollar{ color: var(--text-dim); margin-right:6px; }
+  .cmd{ color: var(--text-bright); }
+  .out{ color: var(--text-mid); margin: 4px 0 0 0; }
+  .comment{ color: var(--text-dim); }
+  .accent{ color: var(--pink); }
+  .amber{ color: var(--amber); }
+  .strike{ text-decoration: line-through; color: var(--text-dim); }
+
+  .block{ margin-bottom: 30px; }
+  .typing-cursor{
+    display:inline-block; width:8px; height:15px;
+    background: var(--green);
+    vertical-align: text-bottom;
+    margin-left:2px;
+    animation: blink 0.9s ease-in-out infinite;
+    box-shadow: 0 0 8px rgba(110,231,168,0.5);
+  }
+
+  .chip{ transition: transform .25s cubic-bezier(.16,1,.3,1), border-color .25s ease, background .25s ease; }
+  .chip:hover{ transform: translateY(-2px); border-color: var(--green); background: rgba(110,231,168,0.06); }
+
+  h1.brand{
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight:700;
+    color: var(--text-bright);
+    letter-spacing: -0.5px;
+    display:inline-block;
+  }
+  .role-line{ color:var(--text-dim); margin-top:6px; font-size:13px; letter-spacing:1px; text-transform:uppercase; }
+  .visitor-line{ color:var(--text-dim); margin-top:10px; font-size:12px; }
+  .visitor-line .comment{ opacity:0.75; }
+
+  .tree{ margin-top:6px; }
+  .tree .node{ display:flex; gap:10px; align-items:baseline; padding:3px 0; }
+  .branch{ color: var(--text-dim); }
+  .node a{ color: var(--pink); font-weight:500; }
+  .node .desc{ color: var(--text-dim); font-size:13px; }
+  .node:hover a{ border-bottom-color: var(--pink); }
+
+  .stack{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .chip{
+    border:1px solid var(--border);
+    color: var(--text-mid);
+    padding:4px 10px;
+    border-radius:3px;
+    font-size:12.5px;
+    background: rgba(110,231,168,0.03);
+  }
+
+  .cursor{
+    display:inline-block; width:8px; height:16px;
+    background: var(--green);
+    vertical-align: text-bottom;
+    animation: blink 0.9s ease-in-out infinite;
+    margin-left:2px;
+    box-shadow: 0 0 8px rgba(110,231,168,0.5);
+  }
+  @keyframes blink{ 0%,100%{ opacity:1; } 50%{ opacity:0; } }
+
+  /* live terminal input */
+  .live{
+    margin-top: 40px;
+    border-top: 1px dashed var(--border);
+    padding-top: 20px;
+  }
+  .live-log{ display:flex; flex-direction:column; gap:2px; margin-bottom:8px; }
+  .live-line{
+    display:flex;
+    white-space: pre-wrap;
+    opacity:0;
+    transform: translateY(6px);
+    animation: liveRise .4s cubic-bezier(.16,1,.3,1) forwards;
+  }
+  @keyframes liveRise{ to{ opacity:1; transform:none; } }
+  .input-row{ display:flex; align-items:center; gap:8px; }
+  .input-row input{
+    flex:1;
+    background:transparent;
+    border:none;
+    outline:none;
+    color: var(--text-bright);
+    font-family:'JetBrains Mono', monospace;
+    font-size:15px;
+    caret-color: var(--green);
+  }
+  .hint{ color: var(--text-dim); font-size:12px; margin-top:10px; }
+
+  .input-row{ position:relative; }
+  .input-row::after{
+    content:"";
+    position:absolute; left:0; right:0; bottom:-6px; height:1px;
+    background: var(--border);
+  }
+  .input-row.focused::after{ background: var(--green); box-shadow: 0 0 6px rgba(110,231,168,0.4); }
+
+  footer{
+    text-align:center;
+    color: var(--text-dim);
+    font-size:12px;
+    margin-top:50px;
+  }
+
+  .toast{
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translate(-50%, 16px);
+    display:flex;
+    align-items:center;
+    gap:9px;
+    background: var(--bg-panel);
+    border: 1px solid var(--green);
+    color: var(--text-bright);
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px;
+    padding:11px 18px;
+    border-radius:6px;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 12px 30px -8px rgba(0,0,0,0.7), 0 0 20px -6px rgba(110,231,168,0.35);
+    opacity:0;
+    pointer-events:none;
+    transition: opacity .25s ease, transform .25s cubic-bezier(.16,1,.3,1);
+    z-index:100;
+  }
+  .toast.show{ opacity:1; transform: translate(-50%, 0); }
+  .toast .toast-dot{
+    width:7px; height:7px; border-radius:50%;
+    background: var(--green);
+    box-shadow: 0 0 8px rgba(110,231,168,0.8);
+    flex-shrink:0;
+  }
+  .email-link{ cursor:pointer; }
+
+  .status-badge{
+    display:flex; align-items:center; gap:6px;
+    font-size:11px;
+    letter-spacing:0.5px;
+    color: var(--text-dim);
+    text-transform:uppercase;
+  }
+  .status-dot{
+    width:7px; height:7px; border-radius:50%;
+    background: var(--green);
+    box-shadow: 0 0 8px rgba(110,231,168,0.8);
+    animation: blink 1.6s ease-in-out infinite;
+  }
+
+  #matrixCanvas{
+    position:fixed; inset:0;
+    width:100%; height:100%;
+    z-index:40;
+    pointer-events:none;
+    opacity:0;
+    transition: opacity .5s ease;
+  }
+  #matrixCanvas.show{ opacity:0.85; }
+
+  h1.brand{ transition: text-shadow .3s ease; }
+  h1.brand:hover{ text-shadow: 0 0 18px rgba(110,231,168,0.45), 0 0 4px rgba(110,231,168,0.6); }
+
+  .window.party{
+    animation: partyPulse 1.4s linear 3;
+  }
+  @keyframes partyPulse{
+    0%   { box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 20px 60px -20px rgba(0,0,0,0.6), 0 0 0 2px var(--green); }
+    25%  { box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 20px 60px -20px rgba(0,0,0,0.6), 0 0 0 2px var(--pink); }
+    50%  { box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 20px 60px -20px rgba(0,0,0,0.6), 0 0 0 2px var(--cyan); }
+    75%  { box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 20px 60px -20px rgba(0,0,0,0.6), 0 0 0 2px var(--amber); }
+    100% { box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 20px 60px -20px rgba(0,0,0,0.6), 0 0 0 2px var(--green); }
+  }
+
+  .window{ transition: border-color .3s ease; }
+
+  .boot-splash{
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .boot-line{ margin-bottom: 8px; }
+  .boot-dots::after{
+    content: '';
+    animation: bootDots 1s steps(4, end) infinite;
+  }
+  @keyframes bootDots{
+    0%{ content:''; } 25%{ content:'.'; } 50%{ content:'..'; } 75%{ content:'...'; } 100%{ content:''; }
+  }
+  .boot-bar{
+    width: 100%;
+    max-width: 260px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .boot-bar-fill{
+    height: 100%;
+    width: 0%;
+    background: var(--green);
+    box-shadow: 0 0 8px rgba(110,231,168,0.7);
+    transition: width .7s cubic-bezier(.16,1,.3,1);
+  }
+  .boot-splash.hide{
+    animation: bootFadeOut .35s ease forwards;
+  }
+  @keyframes bootFadeOut{ to{ opacity:0; height:0; margin:0; } }
+
+  @media (max-width:520px){
+    .crt-frame{ padding: 28px 12px 90px; }
+    body{ font-size:13.5px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .cursor, .typing-cursor{ animation:none; }
+    .block .out{ opacity:1; animation:none; }
+    .window{ opacity:1; transform:none; animation:none; }
+    .stack .chip, .tree .node{ opacity:1; transform:none; animation:none; }
+    .live-line{ opacity:1; transform:none; animation:none; }
+    .status-dot{ animation:none; }
+    .window.party{ animation:none; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="matrixCanvas"></canvas>
+
+<div class="crt-frame">
+
+  <div class="titlebar">
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div class="path">tuhin@portfolio: ~/tuhinpaik.in</div>
+    <div class="status-badge"><span class="status-dot"></span>online</div>
+  </div>
+
+  <div class="window">
+
+    <div class="boot-splash" id="bootSplash">
+      <div class="boot-line">booting portfolio.exe<span class="boot-dots"></span></div>
+      <div class="boot-bar"><div class="boot-bar-fill" id="bootBarFill"></div></div>
+    </div>
+
+    <div id="typedContent"></div>
+
+    <div class="live block" id="liveBlock" style="display:none;">
+      <div class="line comment"># type 'help' and hit enter</div>
+      <div class="live-log" id="liveLog"></div>
+      <div class="input-row">
+        <span class="prompt-user">tuhin</span><span class="prompt-sep">@</span><span class="prompt-user">portfolio</span><span class="prompt-path">:~$</span>
+        <input type="text" id="cmdInput" autocomplete="off" spellcheck="false" placeholder="">
+        <span class="cursor" id="typeCursor"></span>
+      </div>
+    </div>
+
+    <div class="resize-handle" id="resizeHandle" title="drag to resize"></div>
+
+  </div>
+
+  <div class="window-hint">drag the titlebar to move · drag this corner ◢ to resize · double-click the titlebar to reset</div>
+
+  <footer>tuhinpaik.in — built by tuhin · <span class="strike">bye see u soon</span> welcome, stay a while</footer>
+
+</div>
+
+<div class="toast" id="toast"><span class="toast-dot"></span><span id="toastText">copied!</span></div>
+
+<script>
+  const typedContent = document.getElementById('typedContent');
+  const liveBlock = document.getElementById('liveBlock');
+
+  const promptHTML = `<span class="prompt-user">tuhin</span><span class="prompt-sep">@</span><span class="prompt-user">portfolio</span><span class="prompt-path">:~$</span> `;
+
+  /* ---------- visitor counter (this browser only — no backend, no global count) ---------- */
+  function bumpVisitorCount(){
+    let count = parseInt(localStorage.getItem('tp_visit_count') || '0', 10);
+    count += 1;
+    localStorage.setItem('tp_visit_count', String(count));
+    return count;
+  }
+  const visitorCount = bumpVisitorCount();
+  const visitorLabel = `#${String(visitorCount).padStart(4, '0')}`;
+
+  // each entry: the command that gets typed out, then the output revealed after
+  const sequence = [
+    {
+      cmd: 'whoami',
+      outHTML: `<h1 class="brand">Tuhin Paik</h1><div class="role-line">developer · builder · learner</div><div class="visitor-line">visitor ${visitorLabel} on this device <span class="comment">// local count, not a global tracker — chill</span></div>`
+    },
+    {
+      cmd: 'cat about.txt',
+      outHTML: `hi, i'm tuhin — i like taking things apart to see how they work,<br>
+        then putting them back together <span class="accent">better</span> (usually).<br>
+        currently learning in public and shipping small, useful things.<br>
+        <span class="comment">// fun fact: 90% of my code works. no one knows why. the other 10% doesn't work either.</span>`
+    },
+    {
+      cmd: 'cat stack.json',
+      outHTML: `<div class="stack">
+        <span class="chip">JavaScript</span>
+        <span class="chip">Python</span>
+        <span class="chip">React</span>
+        <span class="chip">Node.js</span>
+        <span class="chip">SQL</span>
+        <span class="chip">Git</span>
+      </div>`
+    },
+    {
+      cmd: 'cat education.txt',
+      outHTML: `<div class="tree">
+        <div class="node"><span class="branch">└──</span> <span class="prompt-path">St. Xavier's College</span> <span class="desc">— BCA (Hons.)</span></div>
+      </div>`
+    },
+    {
+      cmd: 'tree ./links/',
+      outHTML: `<div class="tree">
+        <div class="node"><span class="branch">├──</span> <a href="#" target="_blank" rel="noopener">GitHub</a></div>
+        <div class="node"><span class="branch">├──</span> <a href="#" target="_blank" rel="noopener">LinkedIn</a></div>
+        <div class="node"><span class="branch">├──</span> <a href="#" target="_blank" rel="noopener">Instagram</a></div>
+        <div class="node"><span class="branch">└──</span> <a href="mailto:tuhinpaik@outlook.com" class="email-link" data-email="tuhinpaik@outlook.com">Email</a></div>
+      </div>`
+    }
+  ];
+
+  const TYPE_SPEED = 32;       // ms per character for commands
+  const OUT_TYPE_SPEED = 14;   // ms per character for output text (faster — it's just prose/UI, not "typed" by a person)
+  const PAUSE_AFTER_CMD = 160; // pause after command finishes, before output starts
+  const PAUSE_AFTER_OUTPUT = 380; // ms before next line starts
+
+  // types out an HTML string node-by-node / char-by-char while preserving tag structure.
+  // works by walking the DOM in document order and revealing one text character at a time.
+  function typeHTML(container, html, speed, onDone){
+    container.innerHTML = html;
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
+    const textNodes = [];
+    let node;
+    while((node = walker.nextNode())) textNodes.push(node);
+
+    const fullTexts = textNodes.map(n => n.nodeValue.replace(/\s+/g, ' '));
+    textNodes.forEach(n => { n.nodeValue = ''; });
+
+    const cursor = document.createElement('span');
+    cursor.className = 'typing-cursor';
+    container.appendChild(cursor);
+
+    let ni = 0, ci = 0;
+
+    function step(){
+      if(ni >= textNodes.length){
+        cursor.remove();
+        if(onDone) onDone();
+        return;
+      }
+      const full = fullTexts[ni];
+      if(ci < full.length){
+        textNodes[ni].nodeValue += full.charAt(ci);
+        ci++;
+        const jitter = speed + (Math.random() * (speed * 0.6) - speed * 0.3);
+        setTimeout(step, Math.max(4, jitter));
+      } else {
+        ni++; ci = 0;
+        step();
+      }
+    }
+    step();
+  }
+
+  function typeLine(index){
+    if(index >= sequence.length){
+      liveBlock.style.display = '';
+      document.getElementById('cmdInput').focus();
+      return;
+    }
+
+    const item = sequence[index];
+    const block = document.createElement('div');
+    block.className = 'block';
+    block.innerHTML = `<div class="line">${promptHTML}<span class="cmd"></span></div><div class="out"></div>`;
+    typedContent.appendChild(block);
+    block.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+    const cmdSpan = block.querySelector('.cmd');
+    const outDiv = block.querySelector('.out');
+
+    typeHTML(cmdSpan, item.cmd, TYPE_SPEED, () => {
+      setTimeout(() => {
+        typeHTML(outDiv, item.outHTML, OUT_TYPE_SPEED, () => {
+          setTimeout(() => typeLine(index + 1), PAUSE_AFTER_OUTPUT);
+        });
+      }, PAUSE_AFTER_CMD);
+    });
+  }
+
+  (function runBootSplash(){
+    const splash = document.getElementById('bootSplash');
+    const fill = document.getElementById('bootBarFill');
+    requestAnimationFrame(() => { fill.style.width = '100%'; });
+    setTimeout(() => {
+      splash.classList.add('hide');
+      setTimeout(() => { splash.remove(); typeLine(0); }, 350);
+    }, 700);
+  })();
+
+  const log = document.getElementById('liveLog');
+  const input = document.getElementById('cmdInput');
+
+  const responses = {
+    help: "available: about · education · links · contact · skills · clear · guestbook · sign · (psst, try 'sudo', 'coffee', 'joke', 'matrix', 'theme', 'party', or just poke around)",
+    about: "tuhin paik — developer who likes building small useful things & learning in public.",
+    education: "st. xavier's college — bca (hons.)",
+    links: "see ./links/ above — github, linkedin, instagram, email",
+    instagram: "see ./links/ above — instagram",
+    insta: "see ./links/ above — instagram",
+    contact: "reach me at tuhinpaik@outlook.com",
+    skills: "javascript · python · react · node.js · sql · git",
+    sudo: "nice try. permission denied. (this isn't that kind of website)",
+    "sudo su": "access denied. this terminal has trust issues.",
+    "whoami": "tuhin paik",
+    ls: "about.txt  stack.json  education.txt  links/  dreams.txt (empty)",
+    "ls -la": "drwxr-xr-x  you, standing here, reading a fake filesystem. respect.",
+    pwd: "/home/tuhin/definitely-not-lost",
+    cd: "cd where? this isn't that kind of shell.",
+    "cd ..": "there is no parent directory. only vibes.",
+    date: new Date().toDateString() + " — probably a good day to ship something.",
+    coffee: "brewing... ☕ error 418: i'm a teapot",
+    tea: "wrong beverage. this is a coffee-only establishment. (see: 'coffee')",
+    joke: "why do programmers prefer dark mode? because light attracts bugs.",
+    joke2: "i told my code a joke. no reaction. turns out it was un-response-ive.",
+    "another joke": "there are 10 kinds of people: those who understand binary and those who don't.",
+    "rm -rf /": "absolutely not. nice try though.",
+    "sudo rm -rf /": "not even with sudo. especially not with sudo.",
+    format: "formatting... just kidding. this is a portfolio, not a hostage situation.",
+    matrix: "there is no spoon. there is, however, a bug in production.",
+    "the cake is a lie": "confirmed. so is 100% test coverage.",
+    love: "i love clean code, semicolons, and pretending merge conflicts don't scare me.",
+    "hire me": "bold move typing that into a terminal. respect. → tuhinpaik@outlook.com",
+    exit: "you can't exit a portfolio. you can only admire it more.",
+    quit: "same energy as 'exit'. also doesn't work.",
+    "42": "the answer to life, the universe, and everything. still debugging the question though.",
+    ping: "pong. (latency: however long it took you to read this)",
+    fortune: "you will encounter a semicolon today. it will end a statement, or your patience.",
+    cowsay: "( moo )\n  \\   ^__^\n   \\  (oo)\\_______\n      (__)\\       )\\/\\\n          ||----w |\n          ||     ||",
+    "hello world": "console.log('hello, world') — the first lie every programmer tells a computer.",
+    vim: "you're now in vim. good luck exiting. (kidding — try ':q' somewhere else, not here)",
+    ":q": "vim jokes don't work in a fake terminal. but i respect the instinct.",
+    emacs: "bold choice. this terminal remains neutral in the editor wars.",
+    "git commit": "committing... message: 'fixed stuff'. classic.",
+    "git blame": "it was probably you. it's always you.",
+    "git push --force": "living dangerously, i see. hope the team forgives you.",
+    banana: "🍌 no idea why you typed that, but here's a banana.",
+    konami: "you know the code. try it on your keyboard, not in here. ↑↑↓↓←→←→ba",
+    "make me a sandwich": "sudo make me a sandwich — oh wait, you didn't say sudo.",
+    "sudo make me a sandwich": "okay, fine. 🥪 here you go.",
+    "why": "why not?",
+    "meaning of life": "42, probably. or shipping something you're proud of.",
+    "is this real": "as real as a terminal built entirely out of divs and ambition.",
+    theme: "try 'theme green', 'theme pink', 'theme cyan', or 'theme amber' — repaints the whole site live.",
+    party: "🎉 party mode activated (css confetti not included, sorry)",
+    "achievement unlocked": "🏆 you read the source. respect +10.",
+    share: "copied tuhinpaik.in to your clipboard — go tell someone.",
+    visitors: "check the count under 'whoami' above — it only tracks this browser, not the whole internet.",
+  };
+
+  function addLine(text, cls, animate){
+    const div = document.createElement('div');
+    div.className = 'live-line ' + (cls || 'out');
+    log.appendChild(div);
+    if(animate){
+      let i = 0;
+      const cursor = document.createElement('span');
+      cursor.className = 'typing-cursor';
+      div.appendChild(cursor);
+      (function step(){
+        if(i < text.length){
+          div.insertBefore(document.createTextNode(text.charAt(i)), cursor);
+          i++;
+          setTimeout(step, 12 + Math.random() * 10);
+        } else {
+          cursor.remove();
+        }
+      })();
+    } else {
+      div.textContent = text;
+    }
+  }
+
+  /* ---------- fun visual effects: matrix rain, theme switch, party mode ---------- */
+  function runMatrixRain(durationMs){
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const chars = 'アイウエオカキクケコサシスセソ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ<>{}/;';
+    const fontSize = 15;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = new Array(columns).fill(1);
+    canvas.classList.add('show');
+
+    function draw(){
+      ctx.fillStyle = 'rgba(10,15,14,0.09)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#6ee7a8';
+      ctx.font = fontSize + 'px monospace';
+      for(let i = 0; i < drops.length; i++){
+        const text = chars.charAt(Math.floor(Math.random() * chars.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+    }
+    const interval = setInterval(draw, 45);
+    setTimeout(() => {
+      clearInterval(interval);
+      canvas.classList.remove('show');
+      setTimeout(() => ctx.clearRect(0, 0, canvas.width, canvas.height), 550);
+    }, durationMs || 4000);
+  }
+
+  const THEMES = { green: '#6ee7a8', pink: '#f28cc6', cyan: '#7cd4d8', amber: '#e8b76a' };
+  function setTheme(name){
+    const color = THEMES[name];
+    if(!color) return false;
+    document.documentElement.style.setProperty('--pink', color);
+    return true;
+  }
+
+  function runParty(){
+    const win = document.querySelector('.window');
+    win.classList.remove('party');
+    void win.offsetWidth; // restart animation
+    win.classList.add('party');
+    setTimeout(() => win.classList.remove('party'), 4300);
+  }
+
+  /* ---------- secret guestbook (saved to this browser only — no backend) ---------- */
+  function getGuestbook(){
+    try{ return JSON.parse(localStorage.getItem('tp_guestbook') || '[]'); }
+    catch(err){ return []; }
+  }
+  function saveGuestEntry(msg){
+    const book = getGuestbook();
+    book.push({ msg: msg.slice(0, 140), ts: Date.now() });
+    localStorage.setItem('tp_guestbook', JSON.stringify(book));
+  }
+  function renderGuestbook(){
+    const book = getGuestbook();
+    if(book.length === 0){
+      return "guestbook's empty. type 'sign' to leave the first message.";
+    }
+    const recent = book.slice(-5).reverse();
+    const lines = recent.map(e => `"${e.msg}" — ${new Date(e.ts).toLocaleDateString()}`).join('\n');
+    return `last ${recent.length} of ${book.length} ${book.length === 1 ? 'entry' : 'entries'}:\n${lines}`;
+  }
+
+  let mode = 'command'; // 'command' | 'guestbook'
+
+  input.addEventListener('keydown', (e) => {
+    if(e.key !== 'Enter') return;
+    const val = input.value.trim();
+    if(!val) return;
+    addLine('tuhin@portfolio:~$ ' + val, 'cmd');
+    input.value = '';
+
+    if(mode === 'guestbook'){
+      if(val.toLowerCase() === 'cancel'){
+        addLine('cancelled — nothing signed.', 'out', true);
+      } else {
+        saveGuestEntry(val);
+        addLine(`✍️ signed — thanks for stopping by. (saved to this browser only — type 'guestbook' to see it)`, 'out', true);
+      }
+      mode = 'command';
+      log.scrollIntoView({block:'nearest'});
+      return;
+    }
+
+    const key = val.toLowerCase();
+
+    if(key === 'clear'){
+      log.innerHTML = '';
+    } else if(key === 'matrix'){
+      addLine(responses.matrix, 'out', true);
+      runMatrixRain();
+    } else if(key === 'party'){
+      addLine(responses.party, 'out', true);
+      runParty();
+    } else if(key.startsWith('theme ')){
+      const color = key.split(' ')[1];
+      if(setTheme(color)){
+        addLine(`theme switched to ${color} ✓`, 'out', true);
+      } else {
+        addLine(`unknown theme "${color}" — try green, pink, cyan, or amber`, 'out', true);
+      }
+    } else if(key === 'time'){
+      addLine(new Date().toLocaleTimeString() + ' — synced to whatever your device thinks the time is.', 'out', true);
+    } else if(key === 'share'){
+      addLine(responses.share, 'out', true);
+      copyEmail('https://tuhinpaik.in');
+    } else if(key === 'sign' || key === 'sign guestbook' || key === 'guestbook sign'){
+      mode = 'guestbook';
+      addLine("leave a message (max 140 chars) and hit enter. type 'cancel' to back out.", 'out', true);
+    } else if(key === 'guestbook'){
+      addLine(renderGuestbook(), 'out', true);
+    } else {
+      const resp = responses[key] || `command not found: ${val} — even google doesn't know that one. try 'help'`;
+      addLine(resp, 'out', true);
+    }
+    log.scrollIntoView({block:'nearest'});
+  });
+
+  const inputRow = document.querySelector('.input-row');
+  input.addEventListener('focus', () => inputRow.classList.add('focused'));
+  input.addEventListener('blur', () => inputRow.classList.remove('focused'));
+
+  document.addEventListener('click', () => input.focus());
+
+  /* ---------- real konami code easter egg ---------- */
+  const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+  let konamiProgress = 0;
+  document.addEventListener('keydown', (e) => {
+    const expected = KONAMI[konamiProgress];
+    const got = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    if(got === expected){
+      konamiProgress++;
+      if(konamiProgress === KONAMI.length){
+        konamiProgress = 0;
+        runMatrixRain(5000);
+        runParty();
+        flashToast('🏆 konami code unlocked — achievement earned');
+      }
+    } else {
+      konamiProgress = (got === KONAMI[0]) ? 1 : 0;
+    }
+  });
+
+  /* ---------- copy email to clipboard + toast ---------- */
+  const toast = document.getElementById('toast');
+  const toastText = document.getElementById('toastText');
+  let toastTimer = null;
+
+  function flashToast(msg){
+    toastText.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  function copyEmail(email){
+    const done = () => flashToast(`copied "${email}" to clipboard ✓`);
+    const fail = () => flashToast(`couldn't copy — email is ${email}`);
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(email).then(done).catch(fail);
+    } else {
+      try{
+        const tmp = document.createElement('textarea');
+        tmp.value = email;
+        tmp.style.position = 'fixed';
+        tmp.style.opacity = '0';
+        document.body.appendChild(tmp);
+        tmp.select();
+        document.execCommand('copy');
+        document.body.removeChild(tmp);
+        done();
+      } catch(err){ fail(); }
+    }
+  }
+
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('.email-link');
+    if(!link) return;
+    e.preventDefault();
+    e.stopPropagation();
+    copyEmail(link.dataset.email || link.textContent.trim());
+  });
+
+  /* ---------- draggable + resizable terminal window (desktop only) ---------- */
+  (function enableWindowControls(){
+    const frame = document.querySelector('.crt-frame');
+    const titlebar = document.querySelector('.titlebar');
+    const win = document.querySelector('.window');
+    const handle = document.getElementById('resizeHandle');
+    if(!frame || !titlebar || !win || !handle) return;
+    if(window.innerWidth < 700) return; // keep normal document flow on mobile
+
+    let offsetX = 0, offsetY = 0;
+    let dragging = false, dragStartX = 0, dragStartY = 0, startOffsetX = 0, startOffsetY = 0;
+
+    function onDragMove(e){
+      if(!dragging) return;
+      offsetX = startOffsetX + (e.clientX - dragStartX);
+      offsetY = startOffsetY + (e.clientY - dragStartY);
+      frame.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+    }
+    function onDragEnd(){
+      dragging = false;
+      titlebar.classList.remove('dragging');
+    }
+    titlebar.addEventListener('mousedown', (e) => {
+      if(e.target.closest('.status-badge')) return;
+      dragging = true;
+      titlebar.classList.add('dragging');
+      dragStartX = e.clientX; dragStartY = e.clientY;
+      startOffsetX = offsetX; startOffsetY = offsetY;
+      e.preventDefault();
+    });
+    window.addEventListener('mousemove', onDragMove);
+    window.addEventListener('mouseup', onDragEnd);
+    titlebar.addEventListener('dblclick', () => {
+      offsetX = 0; offsetY = 0;
+      frame.style.transform = '';
+      win.style.width = '';
+      win.style.height = '';
+      win.style.overflow = '';
+    });
+
+    let resizing = false, startW = 0, startH = 0, startRX = 0, startRY = 0;
+    handle.addEventListener('mousedown', (e) => {
+      resizing = true;
+      startW = win.offsetWidth; startH = win.offsetHeight;
+      startRX = e.clientX; startRY = e.clientY;
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    window.addEventListener('mousemove', (e) => {
+      if(!resizing) return;
+      const newW = Math.max(320, startW + (e.clientX - startRX));
+      const newH = Math.max(220, startH + (e.clientY - startRY));
+      win.style.width = newW + 'px';
+      win.style.height = newH + 'px';
+      win.style.overflow = 'auto';
+    });
+    window.addEventListener('mouseup', () => { resizing = false; });
+  })();
+</script>
+
+</body>
+</html>
